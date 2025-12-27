@@ -6,44 +6,72 @@ This tool automates archiving your Snapchat export with proper metadata. It matc
 
 ### Prerequisites
 
-You need the following tools in your system PATH:
+You need the following tools in your system PATH but it only works in Linux:
 
-| Tool | Purpose | Linux | Windows |
-| --- | --- | --- | --- |
-| **FFmpeg** | Video merging | `sudo apt install ffmpeg` | [ffmpeg.org](https://ffmpeg.org/download.html) |
+| Tool | Purpose | Linux |
+| --- | --- | --- |
+| **FFmpeg** | Video merging | [ffmpeg.org](https://ffmpeg.org/download.html) |
 
 ---
 
 ### Building from Source
 
+To build the application, ensure you have Go installed (version 1.24 or newer) and `make` is available on your system. Navigate to the project root and execute:
+
 **Linux & macOS**
 
 ```bash
-go get github.com/dsoprea/go-exif/v3
-go get github.com/dsoprea/go-jpeg-image-structure/v2
-go get golang.org/x/image/draw
-go build -o snap-memory-downloader main.go
-````
+make linux
+```
 
 **Windows**
 
 ```powershell
-go build -o snap-memory-downloader.exe main.go
+make windows
 ```
 
 ---
 
 ### Usage
 
-Place the binary in the same folder as your `memories_history.html` and run:
+Place the binary in the same folder as your `memories_history.html` or `memory_history.json` and run:
 
 ```bash
 ./snap-memory-downloader -input memories_history.html -output ./MyMemories
+# Or for JSON input
+./snap-memory-downloader -input memory_history.json -output ./MyMemories
+```
+
+**Example Console Output**
+
+```
+Found 100 memories. Using 8 workers.
+[==============---------------] 50/100 ETA: 10s
+Task finished.
+```
+
+### Output
+
+The output directory will have the following structure:
+
+```
+MyMemories/
+├── 2023/
+│   ├── 01/
+│   │   ├── Photo 01-Jan-2023 15-04-05.jpg
+│   │   └── Video 02-Jan-2023 16-30-00.mp4
+│   └── 02/
+│       └── ...
+└── overlays/
+    ├── images/
+    │   └── ...
+    └── videos/
+        └── ...
 ```
 
 **Arguments**
 
-* `-input`: Path to the HTML file (Default: `memories_history.html`)
+* `-input`: Path to the input file, which can be either an HTML (`.html`) or JSON (`.json`) file. If this flag is omitted, the program will first look for `memories_history.html`. If that's not found, it will then look for `memory_history.json`.
 * `-output`: Directory for saved files (Default: `./output`)
 * `-workers`: Concurrent downloads (Default: CPU core count)
 * `-skip-video-overlay`: If set, videos are kept without overlays (default on Windows)
