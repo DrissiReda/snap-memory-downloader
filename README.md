@@ -14,6 +14,32 @@ You need the following tools in your system PATH but it only works in Linux:
 
 ---
 
+### Usage
+
+Download the binary for your system, for windows it is the .exe binary from releases.
+
+Place the binary in the same folder as your `memories_history.html` or `memory_history.json` 
+
+If you are on windows and don't want the hassle, just double click on the binary and it'll download everything locally.
+Images will have their overlays. Videos that are supposed to have overlays will be downloaded without.
+
+Run:
+
+```bash
+./snap-memory-downloader -input memories_history.html -output ./MyMemories
+# Or for JSON input
+./snap-memory-downloader -input memory_history.json -output ./MyMemories
+```
+
+**Example Console Output**
+
+```
+Found 100 memories. Using 8 workers.
+[==============---------------] 50/100 ETA: 10s
+Task finished.
+```
+
+---
 ### Building from Source
 
 To build the application, ensure you have Go installed (version 1.24 or newer) and `make` is available on your system. Navigate to the project root and execute:
@@ -31,24 +57,6 @@ make windows
 ```
 
 ---
-
-### Usage
-
-Place the binary in the same folder as your `memories_history.html` or `memory_history.json` and run:
-
-```bash
-./snap-memory-downloader -input memories_history.html -output ./MyMemories
-# Or for JSON input
-./snap-memory-downloader -input memory_history.json -output ./MyMemories
-```
-
-**Example Console Output**
-
-```
-Found 100 memories. Using 8 workers.
-[==============---------------] 50/100 ETA: 10s
-Task finished.
-```
 
 ### Output
 
@@ -81,4 +89,6 @@ MyMemories/
 
 * For **Windows users**, just place `memories_history.html` in the same directory as the binary. Video overlay processing is disabled by default.
 * For **Linux/macOS users**, you can enable video overlays with the `-skip-video-overlay=false` flag to merge filters and captions onto videos.
+
+
 
