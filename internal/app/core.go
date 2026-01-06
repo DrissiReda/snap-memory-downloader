@@ -3,7 +3,7 @@ package app
 import (
 	"archive/zip"
 	"bytes"
-	"encoding/json" // Added for JSON parsing
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,8 +20,10 @@ type Config struct {
 	InputFile        string
 	OutputDir        string
 	Concurrency      int
+	SkipImageOverlay bool
 	SkipVideoOverlay bool
 	KeepArchives     bool
+	DateFormat       string
 }
 
 // MemoryItem represents a single memory item extracted from the HTML file.
@@ -36,11 +38,11 @@ type MemoryItem struct {
 
 // jsonMemoryItem is a helper struct for unmarshaling JSON input.
 type jsonMemoryItem struct {
-	Date           string `json:"Date"`
-	MediaType      string `json:"Media Type"`
-	Location       string `json:"Location"`
-	DownloadLink   string `json:"Download Link"`
-	MediaDownloadUrl string `json:"Media Download Url"` // Include this if present in JSON and potentially useful
+	Date             string `json:"Date"`
+	MediaType        string `json:"Media Type"`
+	Location         string `json:"Location"`
+	DownloadLink     string `json:"Download Link"`
+	MediaDownloadUrl string `json:"Media Download Url"`
 }
 
 // jsonInput is a helper struct for unmarshaling the overall JSON structure.
@@ -98,8 +100,6 @@ func ParseJSON(jsonData []byte) ([]MemoryItem, error) {
 	for _, jItem := range input.SavedMedia {
 		t, err := time.Parse("2006-01-02 15:04:05 UTC", jItem.Date)
 		if err != nil {
-			// Log the error but continue parsing other items if possible, or return error.
-			// For now, let's return error as this is a critical data point.
 			return nil, fmt.Errorf("error parsing date '%s': %w", jItem.Date, err)
 		}
 
@@ -108,7 +108,6 @@ func ParseJSON(jsonData []byte) ([]MemoryItem, error) {
 			ext = ".mp4"
 		}
 
-		// Extract Lat/Lon from "Latitude, Longitude: X, Y" format
 		gps := gpsRegex.FindAllString(jItem.Location, -1)
 		lat, lon := "", ""
 		if len(gps) >= 2 {
@@ -120,7 +119,7 @@ func ParseJSON(jsonData []byte) ([]MemoryItem, error) {
 			Type:      strings.TrimSpace(jItem.MediaType),
 			Latitude:  lat,
 			Longitude: lon,
-			URL:       jItem.MediaDownloadUrl, // Use MediaDownloadUrl as it's consistent with JSON
+			URL:       jItem.MediaDownloadUrl,
 			Extension: ext,
 		})
 	}
@@ -165,9 +164,19 @@ func HandleZip(data []byte, targetPath string, item MemoryItem, config Config) {
 	if baseData == nil {
 		return
 	}
+
+	// Check skip flags based on media type
+	skipOverlay := (item.Extension == ".jpg" && config.SkipImageOverlay) ||
+		(item.Extension == ".mp4" && config.SkipVideoOverlay)
+
+	if skipOverlay {
+		os.WriteFile(targetPath, baseData, 0644)
+		return
+	}
+
 	if item.Extension == ".jpg" && overlayData != nil {
 		mergeImages(baseData, overlayData, targetPath)
-	} else if item.Extension == ".mp4" && overlayData != nil && !config.SkipVideoOverlay {
+	} else if item.Extension == ".mp4" && overlayData != nil {
 		mergeVideos(baseData, overlayData, bName, oName, targetPath)
 	} else {
 		os.WriteFile(targetPath, baseData, 0644)
@@ -182,7 +191,14 @@ func ProcessItem(item MemoryItem, config Config) {
 	}
 
 	year, month := item.Date.Format("2006"), item.Date.Format("01")
-	fileBase := fmt.Sprintf("%s %s", item.Type, item.Date.Format("02-Jan-2006 15-04-05"))
+
+	// Use custom date format if provided
+	dateStr := item.Date.Format("02-Jan-2006 15-04-05")
+	if config.DateFormat != "" {
+		dateStr = FormatDateCustom(item.Date, config.DateFormat)
+	}
+
+	fileBase := fmt.Sprintf("%s %s", item.Type, dateStr)
 	fileName := fileBase + item.Extension
 
 	var finalPath string
@@ -193,6 +209,32 @@ func ProcessItem(item MemoryItem, config Config) {
 	}
 
 	applyMetadata(finalPath, item)
+}
+
+// FormatDateCustom formats a time according to a custom format string.
+func FormatDateCustom(t time.Time, format string) string {
+	// Replace in order: longer patterns first to avoid conflicts
+	replacements := []struct {
+		pattern   string
+		goPattern string
+	}{
+		{"YYYY", "2006"},
+		{"YY", "06"},
+		{"MM", "01"},
+		{"DD", "02"},
+		{"HH", "15"},
+		{"hh", "03"},
+		{"mm", "04"},
+		{"ss", "05"},
+		{"SS", "05"}, // Support both ss and SS for seconds
+	}
+
+	goFormat := format
+	for _, r := range replacements {
+		goFormat = strings.ReplaceAll(goFormat, r.pattern, r.goPattern)
+	}
+
+	return t.Format(goFormat)
 }
 
 // IsZip checks if the given data is a ZIP archive.

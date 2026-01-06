@@ -27,7 +27,6 @@ func TestParseHTML(t *testing.T) {
 			</tbody>
 		</table>
 	`
-
 	expected := []app.MemoryItem{
 		{
 			Date:      time.Date(2023, 10, 27, 10, 0, 0, 0, time.UTC),
@@ -46,13 +45,10 @@ func TestParseHTML(t *testing.T) {
 			Extension: ".mp4",
 		},
 	}
-
 	items := app.ParseHTML(html)
-
 	if len(items) != len(expected) {
 		t.Fatalf("Expected %d items, but got %d", len(expected), len(items))
 	}
-
 	for i, item := range items {
 		if !item.Date.Equal(expected[i].Date) {
 			t.Errorf("Item %d: Expected date %v, but got %v", i, expected[i].Date, item.Date)
@@ -94,7 +90,6 @@ func TestDownloadFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
-
 	if string(data) != "test data" {
 		t.Errorf("Expected 'test data', but got '%s'", string(data))
 	}
@@ -109,5 +104,59 @@ func TestIsZip(t *testing.T) {
 	nonZipData := []byte("this is not a zip file")
 	if app.IsZip(nonZipData) {
 		t.Errorf("Expected false for non-zip data, but got true")
+	}
+}
+
+func TestFormatDateCustom(t *testing.T) {
+	testDate := time.Date(2023, 10, 27, 14, 30, 45, 0, time.UTC)
+
+	tests := []struct {
+		format   string
+		expected string
+	}{
+		{"YYYYMMDD_HHmmSS", "20231027_143045"},
+		{"YYYY-MM-DD HH:mm:ss", "2023-10-27 14:30:45"},
+		{"YYMMDDTHHmmss", "231027T143045"},
+		{"DD/MM/YYYY HH:mm", "27/10/2023 14:30"},
+		{"YYYY.MM.DD-HH.mm.ss", "2023.10.27-14.30.45"},
+		{"YYYYMMDD", "20231027"},
+		{"HH:mm:ss", "14:30:45"},
+	}
+
+	for _, test := range tests {
+		result := app.FormatDateCustom(testDate, test.format)
+		if result != test.expected {
+			t.Errorf("FormatDateCustom(%q): expected %q, got %q", test.format, test.expected, result)
+		}
+	}
+}
+
+func TestFormatDateCustom12Hour(t *testing.T) {
+	testDate := time.Date(2023, 10, 27, 14, 30, 45, 0, time.UTC)
+
+	result := app.FormatDateCustom(testDate, "hh:mm:ss")
+	expected := "02:30:45" // 14:00 in 12-hour format is 02:00
+	if result != expected {
+		t.Errorf("FormatDateCustom 12-hour format: expected %q, got %q", expected, result)
+	}
+}
+
+func TestFormatDateCustomEdgeCases(t *testing.T) {
+	testDate := time.Date(2023, 1, 5, 9, 7, 3, 0, time.UTC)
+
+	tests := []struct {
+		format   string
+		expected string
+	}{
+		{"YYYY-MM-DD", "2023-01-05"},
+		{"YY/MM/DD", "23/01/05"},
+		{"YYYYMMDD_HHmmss", "20230105_090703"},
+	}
+
+	for _, test := range tests {
+		result := app.FormatDateCustom(testDate, test.format)
+		if result != test.expected {
+			t.Errorf("FormatDateCustom edge case (%q): expected %q, got %q", test.format, test.expected, result)
+		}
 	}
 }

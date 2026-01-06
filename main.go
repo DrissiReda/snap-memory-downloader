@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath" // Added for path.Ext
+	"path/filepath"
 	"runtime"
 	"snap-memory-downloader/internal/app"
 	"sync"
@@ -17,16 +17,20 @@ func main() {
 	inputPtr := flag.String("input", "", "Path to the HTML or JSON file. Defaults to memories_history.html or memory_history.json")
 	outputPtr := flag.String("output", "./output", "Directory to save files")
 	workersPtr := flag.Int("workers", defaultWorkers, "Number of concurrent downloads")
-	skipVidPtr := flag.Bool("skip-video-overlay", true, "Ignore overlays for video files")
+	skipImgPtr := flag.Bool("skip-image-overlay", false, "Skip overlays for image files")
+	skipVidPtr := flag.Bool("skip-video-overlay", true, "Skip overlays for video files")
 	keepArchPtr := flag.Bool("keep-archives", false, "Keep original ZIP files in overlays/archives/")
+	dateFormatPtr := flag.String("date-format", "", "Custom date format for filenames (e.g., 'YYYYMMDD_HHMMSS' or 'YYMMDDTHHmmss'). Supported tokens: YYYY, YY, MM, DD, HH, hh, mm, ss")
 	flag.Parse()
 
 	cfg := app.Config{
 		InputFile:        *inputPtr,
 		OutputDir:        *outputPtr,
 		Concurrency:      *workersPtr,
+		SkipImageOverlay: *skipImgPtr,
 		SkipVideoOverlay: *skipVidPtr,
 		KeepArchives:     *keepArchPtr,
+		DateFormat:       *dateFormatPtr,
 	}
 
 	// Handle default input file logic
@@ -93,6 +97,7 @@ func main() {
 		completed++
 		app.PrintProgress(completed, total, startTime)
 	}
+
 	fmt.Println("\nTask finished.")
 }
 
