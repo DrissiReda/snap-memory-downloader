@@ -5,28 +5,29 @@ permissions:
 
 on:
   push:
-    branches: [ "main" ]
-    tags: ['*']
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - '*'
 
 jobs:
   build:
     name: Build Binary
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         include:
-          - goos: linux
+          - os: ubuntu-latest
+            goos: linux
             goarch: amd64
-            suffix: ""
-          - goos: windows
+            name: linux-amd64
+          - os: windows-latest
+            goos: windows
             goarch: amd64
-            suffix: ".exe"
-          - goos: darwin
+            name: windows-amd64.exe
+          - os: macos-latest
+            goos: darwin
             goarch: amd64
-            suffix: ""
+            name: darwin-amd64
 
     steps:
       - name: Checkout code
@@ -38,20 +39,15 @@ jobs:
           go-version: '1.24'
 
       - name: Install dependencies
-        run: |
-          go get github.com/dsoprea/go-exif/v3
-          go get github.com/dsoprea/go-jpeg-image-structure/v2
-          go get golang.org/x/image/draw
+        run: go mod download
 
       - name: Build
         run: |
-          BINARY_NAME="snap-memory-downloader-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
             CGO_ENABLED=0 \
-            go build -o "$BINARY_NAME" main.go
+            go build -o snap-memory-downloader-${{ matrix.name }} gui_main.go
 
       - name: Upload Release Asset
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: snap-memory-downloader-*
