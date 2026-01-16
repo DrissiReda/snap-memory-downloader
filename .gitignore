@@ -6,3 +6,5 @@ output
 *.jpg
 bin/
 *.sh
+vendor
+fyne-cross
