@@ -8,9 +8,9 @@ Archive your Snapchat memories with proper metadata, GPS coordinates, timestamps
 
 | Platform | Binary |
 | --- | --- |
-| **Windows** | [snap-memory-downloader-windows-amd64.exe](https://github.com/yourusername/snap-memory-downloader/releases/latest/download/snap-memory-downloader-windows-amd64.exe) |
-| **macOS** | [snap-memory-downloader-darwin-amd64](https://github.com/yourusername/snap-memory-downloader/releases/latest/download/snap-memory-downloader-darwin-amd64) |
-| **Linux** | [snap-memory-downloader-linux-amd64](https://github.com/yourusername/snap-memory-downloader/releases/latest/download/snap-memory-downloader-linux-amd64) |
+| **Windows** | [snap-memory-downloader.exe](https://github.com/DrissiReda/snap-memory-downloader/releases/latest/download/snap-memory-downloader.exe) |
+| **macOS** | [snap-memory-downloader-darwin](https://github.com/DrissiReda/snap-memory-downloader/releases/latest/download/snap-memory-downloader-darwin) |
+| **Linux** | [snap-memory-downloader](https://github.com/DrissiReda/snap-memory-downloader/releases/latest/download/snap-memory-downloader) |
 
 ---
 
