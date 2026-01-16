@@ -1,4 +1,4 @@
-name: Build Releases
+name: Go
 
 permissions:
   contents: write
@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 jobs:
   build:
