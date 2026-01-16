@@ -28,7 +28,7 @@ Run the executable to open the GUI:
 
 Here is what it looks like
 
-<img width="806" height="646" alt="image" src="https://github.com/user-attachments/assets/0757325e-444f-41ba-8d9f-354c578dce62" />
+<img width="796" height="627" alt="image" src="https://github.com/user-attachments/assets/09c03c69-d6d3-4205-9eb9-09efd4c3a0c4" />
 
 ### Requirements
 
