@@ -2,6 +2,7 @@
 
 Archive your Snapchat memories with proper metadata, GPS coordinates, timestamps, and overlays.
 
+
 ---
 
 ## Download
@@ -24,6 +25,10 @@ Run the executable to open the GUI:
 - Toggle overlays
 - Real-time progress
 - Detailed logging
+
+Here is what it looks like
+
+<img width="806" height="646" alt="image" src="https://github.com/user-attachments/assets/0757325e-444f-41ba-8d9f-354c578dce62" />
 
 ### Requirements
 
